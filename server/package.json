@@ -20,7 +20,9 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.4",
     "morgan": "^1.11.0",
-    "multer": "^2.2.0"
+    "multer": "^2.2.0",
+    "pdf2json": "^4.0.3",
+    "pdfjs-dist": "^6.1.200"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
