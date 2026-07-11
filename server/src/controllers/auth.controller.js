@@ -6,6 +6,22 @@ import apiResponse from "../utils/apiResponse.js";
 import User from "../models/User.model.js";
 
 
+
+const accessTokenOptions = {
+  httpOnly: true,
+  secure: false, // true in production
+  sameSite: "lax",
+  maxAge: 1 * 60 * 1000, // 1 minutes
+};
+
+const refreshTokenOptions = {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
+
+
 // Register User
 export const registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -43,6 +59,11 @@ export const registerUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
+
+  res
+    .cookie("accessToken", accessToken, accessTokenOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenOptions);
+
   return apiResponse(
     res,
     201,
@@ -50,9 +71,8 @@ export const registerUser = asyncHandler(async (req, res) => {
     "User registered successfully",
     {
       user: createdUser,
-      accessToken,
-      refreshToken,
     }
+
   );
 });
 
@@ -94,6 +114,12 @@ export const loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
+  // Set Cookies
+  res
+    .cookie("accessToken", accessToken, accessTokenOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenOptions);
+
+  // Send Response
   return apiResponse(
     res,
     200,
@@ -101,76 +127,104 @@ export const loginUser = asyncHandler(async (req, res) => {
     "Login successful",
     {
       user: loggedInUser,
-      accessToken,
-      refreshToken,
-    }
-  );
+    });
 });
 
 // Logout User
 export const logoutUser = asyncHandler(async (req, res) => {
-
   await User.findByIdAndUpdate(
     req.user._id,
     {
       $unset: {
         refreshToken: 1,
       },
-    },
-    {
-      new: true,
     }
   );
+
+  res
+    .clearCookie("accessToken", accessTokenOptions)
+    .clearCookie("refreshToken", refreshTokenOptions);
 
   return apiResponse(
     res,
     200,
     true,
-    "Logout successful"
+    "Logged out successfully"
   );
 });
-
 
 // Refresh Access Token
 export const refreshAccessToken = asyncHandler(async (req, res) => {
 
-  const { refreshToken } = req.body;
+  const incomingRefreshToken =
+  req.cookies.refreshToken ||
+  req.body.refreshToken;
 
-  if (!refreshToken) {
+  if (!incomingRefreshToken) {
     throw new ApiError(401, "Refresh Token is required");
   }
 
   const decodedToken = jwt.verify(
-    refreshToken,
+    incomingRefreshToken,
     env.REFRESH_TOKEN_SECRET
   );
 
+  // const user = await User.findById(decodedToken._id);
+
+  // if (!user) {
+  //   throw new ApiError(401, "Invalid Refresh Token");
+  // }
+
+  // if (user.refreshToken !== incomingRefreshToken) {
+  //   throw new ApiError(401, "Refresh Token is expired or already used");
+  // }
+
   const user = await User.findById(decodedToken._id);
 
-  if (!user) {
-    throw new ApiError(401, "Invalid Refresh Token");
-  }
+if (!user) {
+  throw new ApiError(401, "Invalid Refresh Token");
+}
 
-  if (user.refreshToken !== refreshToken) {
-    throw new ApiError(401, "Refresh Token is expired or used");
-  }
+console.log("========== REFRESH DEBUG ==========");
+console.log("DB Token:");
+console.log(user.refreshToken);
 
+console.log("Incoming Token:");
+console.log(incomingRefreshToken);
+
+console.log(
+  "Equal ?",
+  user.refreshToken === incomingRefreshToken
+);
+console.log("===================================");
+
+if (user.refreshToken !== incomingRefreshToken) {
+  throw new ApiError(
+    401,
+    "Refresh Token is expired or already used"
+  );
+}
+
+  // Generate new tokens
   const accessToken = user.generateAccessToken();
   const newRefreshToken = user.generateRefreshToken();
 
+  // Save new refresh token
   user.refreshToken = newRefreshToken;
 
   await user.save({ validateBeforeSave: false });
+
+  // Set new cookies
+  res
+    .cookie("accessToken", accessToken, accessTokenOptions)
+    .cookie("refreshToken", newRefreshToken, refreshTokenOptions);
 
   return apiResponse(
     res,
     200,
     true,
     "Access Token Refreshed Successfully",
-    {
-      accessToken,
-      refreshToken: newRefreshToken,
-    }
+    {}
   );
 
 });

@@ -3,9 +3,11 @@ import express from "express";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 
 import {
-  generateInterview,
-  evaluateAnswer,
-  completeInterview,
+    generateInterview,
+    evaluateAnswer,
+    completeInterview,
+    getInterviewById,
+    getInterviewHistory,
 } from "../controllers/interview.controller.js";
 
 const router = express.Router();
@@ -27,5 +29,20 @@ router.post(
   verifyJWT,
   completeInterview
 );
+  
+router.get(
+    "/history",
+    verifyJWT,
+    getInterviewHistory
+);
+
+router.get(
+    "/:interviewId",
+    verifyJWT,
+    getInterviewById
+);
+
+
+
 
 export default router;

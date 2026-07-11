@@ -1,7 +1,6 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
-
 import Resume from "../models/Resume.model.js";
 import groq from "../utils/groq.js";
 import env from "../config/env.js";
@@ -222,6 +221,51 @@ export const completeInterview = asyncHandler(async (req, res) => {
         true,
         "Interview completed successfully.",
         interview
+    );
+
+});
+// Get Interview By Id
+
+export const getInterviewById = asyncHandler(async (req, res) => {
+
+    const { interviewId } = req.params;
+
+    const interview = await Interview.findOne({
+        _id: interviewId,
+        user: req.user._id,
+    });
+
+    if (!interview) {
+        throw new ApiError(404, "Interview not found.");
+    }
+
+    return apiResponse(
+        res,
+        200,
+        true,
+        "Interview fetched successfully.",
+        interview
+    );
+});
+
+export const getInterviewHistory = asyncHandler(async (req, res) => {
+
+    const interviews = await Interview.find({
+        user: req.user._id,
+    })
+        .select(
+            "role difficulty overallScore status createdAt"
+        )
+        .sort({
+            createdAt: -1,
+        });
+
+    return apiResponse(
+        res,
+        200,
+        true,
+        "Interview history fetched successfully.",
+        interviews
     );
 
 });
