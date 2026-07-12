@@ -115,12 +115,9 @@ const Dashboard = () => {
           {/* Profile */}
 
           <button
-            onClick={() =>
-              toast("Profile page coming soon.")
-            }
+            onClick={() => navigate("/profile")}
             className="group rounded-2xl border border-zinc-800 bg-zinc-900 p-8 text-left transition-all duration-300 hover:-translate-y-1 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10"
           >
-
             <User
               className="mb-5 text-blue-500 transition group-hover:scale-110"
               size={38}
@@ -131,9 +128,8 @@ const Dashboard = () => {
             </h2>
 
             <p className="mt-3 text-zinc-400">
-              Manage your account information and preferences.
+              Manage your account information and interview statistics.
             </p>
-
           </button>
 
         </div>

@@ -1,5 +1,5 @@
 import { LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 
 const Navbar = () => {
@@ -24,7 +24,7 @@ const Navbar = () => {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
 
         <h1 className="text-xl font-bold text-white">
-          AI Interview Coach
+       <Link to="/dashboard">   AI Interview Coach</Link>
         </h1>
 
         <div className="flex items-center gap-6">

@@ -10,7 +10,7 @@ import GenerateInterview from "./pages/interview/GenerateInterview";
 import Interview from "./pages/interview/Interview";
 import Result from "./pages/interview/Result";
 import InterviewHistory from "./pages/interview/InterviewHistory";
-
+import Profile from "./pages/Dp/Profile";
 
 
 function App() {
@@ -89,14 +89,23 @@ function App() {
             </ProtectedRoute>
           }
         />
-<Route
-  path="/history"
-  element={
-    <ProtectedRoute>
-      <InterviewHistory />
-    </ProtectedRoute>
-  }
-/>
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <InterviewHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );

@@ -11,7 +11,7 @@ const accessTokenOptions = {
   httpOnly: true,
   secure: false, // true in production
   sameSite: "lax",
-  maxAge: 1 * 60 * 1000, // 1 minutes
+  maxAge: 15 * 60 * 1000, // 15 minutes
 };
 
 const refreshTokenOptions = {
