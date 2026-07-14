@@ -6,26 +6,21 @@ import apiResponse from "../utils/apiResponse.js";
 import User from "../models/User.model.js";
 
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const accessTokenOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === "production",
-  sameSite:
-    env.NODE_ENV === "production"
-      ? "none"
-      : "lax",
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
   maxAge: 15 * 60 * 1000,
 };
 
 const refreshTokenOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === "production",
-  sameSite:
-    env.NODE_ENV === "production"
-      ? "none"
-      : "lax",
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
-
 
 // Register User
 export const registerUser = asyncHandler(async (req, res) => {
