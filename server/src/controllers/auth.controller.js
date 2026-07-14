@@ -6,19 +6,24 @@ import apiResponse from "../utils/apiResponse.js";
 import User from "../models/User.model.js";
 
 
-
 const accessTokenOptions = {
   httpOnly: true,
-  secure: false, // true in production
-  sameSite: "lax",
-  maxAge: 15 * 60 * 1000, // 15 minutes
+  secure: env.NODE_ENV === "production",
+  sameSite:
+    env.NODE_ENV === "production"
+      ? "none"
+      : "lax",
+  maxAge: 15 * 60 * 1000,
 };
 
 const refreshTokenOptions = {
   httpOnly: true,
-  secure: false,
-  sameSite: "lax",
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  secure: env.NODE_ENV === "production",
+  sameSite:
+    env.NODE_ENV === "production"
+      ? "none"
+      : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 
@@ -157,8 +162,8 @@ export const logoutUser = asyncHandler(async (req, res) => {
 export const refreshAccessToken = asyncHandler(async (req, res) => {
 
   const incomingRefreshToken =
-  req.cookies.refreshToken ||
-  req.body.refreshToken;
+    req.cookies.refreshToken ||
+    req.body.refreshToken;
 
   if (!incomingRefreshToken) {
     throw new ApiError(401, "Refresh Token is required");
@@ -181,29 +186,29 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
 
   const user = await User.findById(decodedToken._id);
 
-if (!user) {
-  throw new ApiError(401, "Invalid Refresh Token");
-}
+  if (!user) {
+    throw new ApiError(401, "Invalid Refresh Token");
+  }
 
-console.log("========== REFRESH DEBUG ==========");
-console.log("DB Token:");
-console.log(user.refreshToken);
+  console.log("========== REFRESH DEBUG ==========");
+  console.log("DB Token:");
+  console.log(user.refreshToken);
 
-console.log("Incoming Token:");
-console.log(incomingRefreshToken);
+  console.log("Incoming Token:");
+  console.log(incomingRefreshToken);
 
-console.log(
-  "Equal ?",
-  user.refreshToken === incomingRefreshToken
-);
-console.log("===================================");
-
-if (user.refreshToken !== incomingRefreshToken) {
-  throw new ApiError(
-    401,
-    "Refresh Token is expired or already used"
+  console.log(
+    "Equal ?",
+    user.refreshToken === incomingRefreshToken
   );
-}
+  console.log("===================================");
+
+  if (user.refreshToken !== incomingRefreshToken) {
+    throw new ApiError(
+      401,
+      "Refresh Token is expired or already used"
+    );
+  }
 
   // Generate new tokens
   const accessToken = user.generateAccessToken();

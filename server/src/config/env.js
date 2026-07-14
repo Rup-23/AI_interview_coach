@@ -6,6 +6,8 @@ const env = {
   PORT: process.env.PORT || 5000,
   NODE_ENV: process.env.NODE_ENV || "development",
 
+  CLIENT_URL: process.env.CLIENT_URL,
+
   MONGODB_URI: process.env.MONGODB_URI,
 
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
