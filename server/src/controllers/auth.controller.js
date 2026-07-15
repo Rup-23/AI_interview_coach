@@ -12,7 +12,7 @@ const accessTokenOptions = {
   httpOnly: true,
   secure: isProduction,
   sameSite: isProduction ? "none" : "lax",
-  maxAge: 15 * 60 * 1000,
+  maxAge: 2 * 60 * 1000,
 };
 
 const refreshTokenOptions = {

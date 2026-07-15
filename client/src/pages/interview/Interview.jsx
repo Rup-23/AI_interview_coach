@@ -189,7 +189,7 @@ const Interview = () => {
                     />
                 </div>
 
-                <div className="mt-8 flex items-center justify-between gap-4">
+                <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <Button
                         onClick={() => {
                             if (currentQuestionIndex > 0) {
@@ -209,7 +209,7 @@ const Interview = () => {
                     >
                         Evaluate Answer
                     </Button>
-                    {currentEvaluation && (
+                    {/* {currentEvaluation && (
                         <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
 
                             <h2 className="text-2xl font-semibold text-white">
@@ -253,8 +253,52 @@ const Interview = () => {
                             </div>
 
                         </div>
-                    )}
+                    )} */}
+                    {currentEvaluation && (
+                        <div className="mt-8 w-full rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
 
+                            <h2 className="text-2xl font-semibold text-white">
+                                AI Feedback
+                            </h2>
+
+                            <div className="mt-6">
+
+                                <p className="font-semibold text-blue-400">
+                                    Score
+                                </p>
+
+                                <p className="mt-2 text-white">
+                                    {currentEvaluation.score} / 10
+                                </p>
+
+                            </div>
+
+                            <div className="mt-6">
+
+                                <p className="font-semibold text-blue-400">
+                                    Ideal Answer
+                                </p>
+
+                                <p className="mt-2 whitespace-pre-wrap break-words text-zinc-300">
+                                    {currentEvaluation.idealAnswer}
+                                </p>
+
+                            </div>
+
+                            <div className="mt-6">
+
+                                <p className="font-semibold text-blue-400">
+                                    Feedback
+                                </p>
+
+                                <p className="mt-2 whitespace-pre-wrap wrap-break-word text-zinc-300">
+                                    {currentEvaluation.feedback}
+                                </p>
+
+                            </div>
+
+                        </div>
+                    )}
 
                     {currentQuestionIndex === interview.questions.length - 1 ? (
                         <Button
