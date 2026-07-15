@@ -179,10 +179,10 @@ const Interview = () => {
                                 [currentQuestion._id]: e.target.value,
                             }));
 
-                            setEvaluations((prev) => ({
-                                ...prev,
-                                [currentQuestion._id]: null,
-                            }));
+                        //     setEvaluations((prev) => ({
+                        //         ...prev,
+                        //         [currentQuestion._id]: null,
+                        //     }));
                         }}
                         placeholder="Write your answer here..."
                         className="mt-8 h-52 w-full rounded-xl border border-zinc-700 bg-zinc-950 p-4 text-white outline-none focus:border-blue-500 resize-none"
@@ -209,51 +209,7 @@ const Interview = () => {
                     >
                         Evaluate Answer
                     </Button>
-                    {/* {currentEvaluation && (
-                        <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
-
-                            <h2 className="text-2xl font-semibold text-white">
-                                AI Feedback
-                            </h2>
-
-                            <div className="mt-6">
-
-                                <p className="font-semibold text-blue-400">
-                                    Score
-                                </p>
-
-                                <p className="mt-2 text-white">
-                                    {currentEvaluation.score} / 10
-                                </p>
-
-                            </div>
-
-                            <div className="mt-6">
-
-                                <p className="font-semibold text-blue-400">
-                                    Ideal Answer
-                                </p>
-
-                                <p className="mt-2 whitespace-pre-wrap text-zinc-300">
-                                    {currentEvaluation.idealAnswer}
-                                </p>
-
-                            </div>
-
-                            <div className="mt-6">
-
-                                <p className="font-semibold text-blue-400">
-                                    Feedback
-                                </p>
-
-                                <p className="mt-2 whitespace-pre-wrap text-zinc-300">
-                                    {currentEvaluation.feedback}
-                                </p>
-
-                            </div>
-
-                        </div>
-                    )} */}
+                   
                     {currentEvaluation && (
                         <div className="mt-8 w-full rounded-2xl border border-zinc-800 bg-zinc-900 p-6">
 
@@ -279,7 +235,7 @@ const Interview = () => {
                                     Ideal Answer
                                 </p>
 
-                                <p className="mt-2 whitespace-pre-wrap break-words text-zinc-300">
+                                <p className="mt-2 whitespace-pre-wrap wrap-break-word text-zinc-300">
                                     {currentEvaluation.idealAnswer}
                                 </p>
 
