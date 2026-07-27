@@ -80,11 +80,12 @@ const GenerateInterview = () => {
 
           <div>
 
-            <label className="mb-2 block text-zinc-300">
+            <label htmlFor="targetRole" className="mb-2 block text-zinc-300">
               Target Role
             </label>
 
             <input
+              id="targetRole"
               value={role}
               onChange={(e) =>
                 setRole(e.target.value)
@@ -97,11 +98,12 @@ const GenerateInterview = () => {
 
           <div className="mt-6">
 
-            <label className="mb-2 block text-zinc-300">
+            <label htmlFor="difficulty" className="mb-2 block text-zinc-300">
               Difficulty
             </label>
 
             <select
+              id="difficulty"
               value={difficulty}
               onChange={(e) =>
                 setDifficulty(e.target.value)

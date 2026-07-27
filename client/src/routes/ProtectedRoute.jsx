@@ -1,10 +1,10 @@
-    import { Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 
 const ProtectedRoute = ({ children }) => {
   const { loading, isAuthenticated } = useAuth();
 
-  // Authentication check chal raha hai
+  // Show spinner while checking authentication
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950">
@@ -13,12 +13,11 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // User login nahi hai
+  // Redirect unauthenticated users to login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // User authenticated hai
   return children;
 };
 

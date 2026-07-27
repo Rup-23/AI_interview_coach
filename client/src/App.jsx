@@ -11,11 +11,11 @@ import Interview from "./pages/interview/Interview";
 import Result from "./pages/interview/Result";
 import InterviewHistory from "./pages/interview/InterviewHistory";
 import Profile from "./pages/Dp/Profile";
+import NotFound from "./pages/NotFound";
 
 
 function App() {
   return (
-
     <BrowserRouter>
       <Toaster
         position="top-right"
@@ -55,7 +55,6 @@ function App() {
           }
         />
 
-        {/* Protected Route for Upload Resume */}
         <Route
           path="/resume/upload"
           element={
@@ -105,6 +104,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Catch-all: show 404 for any undefined route */}
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
     </BrowserRouter>

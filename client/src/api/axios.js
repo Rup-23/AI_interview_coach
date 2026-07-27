@@ -1,12 +1,3 @@
-// import axios from "axios";
-
-// const api = axios.create({
-//   baseURL: "http://localhost:5000/api/v1",
-//   withCredentials: true,
-// });
-
-// export default api;
-
 import axios from "axios";
 
 const api = axios.create({
@@ -15,7 +6,6 @@ const api = axios.create({
 });
 
 let isRefreshing = false;
-
 let failedQueue = [];
 
 const processQueue = (error = null) => {
@@ -26,9 +16,15 @@ const processQueue = (error = null) => {
       promise.resolve();
     }
   });
-
   failedQueue = [];
 };
+
+// Endpoints that should never trigger a token refresh
+const SKIP_REFRESH_URLS = [
+  "/auth/refresh-token",
+  "/auth/login",
+  "/auth/register",
+];
 
 api.interceptors.response.use(
   (response) => response,
@@ -36,18 +32,21 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Don't retry auth endpoints — prevents infinite refresh loops
+    const shouldSkip = SKIP_REFRESH_URLS.some((url) =>
+      originalRequest.url?.includes(url)
+    );
+
     if (
       error.response?.status === 401 &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      !shouldSkip
     ) {
       originalRequest._retry = true;
 
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
-          failedQueue.push({
-            resolve,
-            reject,
-          });
+          failedQueue.push({ resolve, reject });
         }).then(() => api(originalRequest));
       }
 
@@ -55,19 +54,16 @@ api.interceptors.response.use(
 
       try {
         await api.post("/auth/refresh-token");
-
         processQueue();
-
         return api(originalRequest);
-      }
-      catch (refreshError) {
+      } catch (refreshError) {
         processQueue(refreshError);
 
-        // window.location.href = "/login";
+        // Notify the app that the session is dead — AuthProvider listens for this
+        window.dispatchEvent(new CustomEvent("auth:logout"));
 
         return Promise.reject(refreshError);
-      }
-      finally {
+      } finally {
         isRefreshing = false;
       }
     }

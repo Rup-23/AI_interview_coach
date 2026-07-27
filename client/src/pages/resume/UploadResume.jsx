@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Upload, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import Navbar from "../../components/layout/Navbar";
 import Button from "../../components/ui/Button";
+import CloudFilePicker from "../../components/ui/CloudFilePicker";
 
 import { uploadResume } from "../../services/resume.service";
 
@@ -12,12 +13,12 @@ const UploadResume = () => {
   const navigate = useNavigate();
 
   const [file, setFile] = useState(null);
-
   const [loading, setLoading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+  const fileInputRef = useRef(null);
 
+  const validateAndSetFile = (selectedFile) => {
     if (!selectedFile) return;
 
     if (selectedFile.type !== "application/pdf") {
@@ -25,44 +26,72 @@ const UploadResume = () => {
       return;
     }
 
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      toast.error("File size must be under 5MB.");
+      return;
+    }
+
     setFile(selectedFile);
   };
 
- const handleUpload = async () => {
-  if (!file) {
-    toast.error("Please select a resume.");
-    return;
-  }
+  const handleFileChange = (e) => {
+    validateAndSetFile(e.target.files[0]);
+  };
 
-  try {
-    setLoading(true);
+  // Handle files from cloud pickers (Google Drive, etc.)
+  const handleCloudFileSelected = (cloudFile) => {
+    validateAndSetFile(cloudFile);
+    toast.success(`Selected: ${cloudFile.name}`);
+  };
 
-    const formData = new FormData();
+  // Drag and drop handlers
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
 
-    formData.append("resume", file);
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
 
-    const response = await uploadResume(formData);
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
 
-    toast.success(response.message);
+    const droppedFile = e.dataTransfer.files[0];
+    validateAndSetFile(droppedFile);
+  };
 
-    // Resume ID save karo
-    sessionStorage.setItem(
-      "resumeId",
-      response.data._id
-    );
+  const handleUpload = async () => {
+    if (!file) {
+      toast.error("Please select a resume.");
+      return;
+    }
 
-    // Next page par jao
-    navigate("/interview/generate");
+    try {
+      setLoading(true);
 
-  } catch (error) {
-    toast.error(
-      error.response?.data?.message ||
-      "Upload failed"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      const response = await uploadResume(formData);
+
+      toast.success(response.message);
+
+      // Save resume ID for the next step
+      sessionStorage.setItem("resumeId", response.data._id);
+
+      navigate("/interview/generate");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+        "Upload failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -79,62 +108,100 @@ const UploadResume = () => {
           Upload your latest resume to generate AI interview questions.
         </p>
 
-        <div className="mt-10 rounded-3xl border-2 border-dashed border-zinc-700 bg-zinc-900 p-12 text-center">
+        {/* Upload Area */}
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              fileInputRef.current?.click();
+            }
+          }}
+          className={`mt-10 cursor-pointer rounded-3xl border-2 border-dashed p-12 text-center transition-all duration-200 ${
+            isDragOver
+              ? "border-blue-500 bg-blue-500/10"
+              : "border-zinc-700 bg-zinc-900 hover:border-zinc-500"
+          }`}
+        >
 
           <Upload
             size={60}
-            className="mx-auto text-blue-500"
+            className={`mx-auto transition ${isDragOver ? "text-blue-400 scale-110" : "text-blue-500"}`}
           />
 
           <h2 className="mt-6 text-2xl font-semibold text-white">
-            Choose your Resume
+            {isDragOver ? "Drop your file here" : "Choose your Resume"}
           </h2>
 
           <p className="mt-2 text-zinc-400">
-            Only PDF files are supported.
+            Drag & drop a PDF here, or click to browse.
+          </p>
+
+          <p className="mt-1 text-sm text-zinc-500">
+            PDF files only • Max 5MB
           </p>
 
           <input
+            ref={fileInputRef}
             type="file"
             accept=".pdf"
             onChange={handleFileChange}
-            className="mt-8 block w-full text-zinc-300
-            file:mr-4
-            file:rounded-lg
-            file:border-0
-            file:bg-blue-600
-            file:px-4
-            file:py-2
-            file:text-white
-            hover:file:bg-blue-700"
+            className="hidden"
+            aria-label="Upload resume PDF"
           />
 
-          {file && (
-            <div className="mt-8 flex items-center justify-center gap-3 rounded-xl bg-zinc-800 p-4">
+        </div>
 
+        {/* Cloud Providers */}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <span className="text-sm text-zinc-500">Or pick from:</span>
+          <CloudFilePicker
+            onFileSelected={handleCloudFileSelected}
+            accept=".pdf"
+            disabled={loading}
+          />
+        </div>
+
+        {/* Selected File Preview */}
+        {file && (
+          <div className="mt-6 flex items-center justify-between gap-3 rounded-xl bg-zinc-800 p-4">
+
+            <div className="flex items-center gap-3">
               <FileText
                 size={24}
-                className="text-blue-500"
+                className="shrink-0 text-blue-500"
               />
-
-              <span className="text-white">
+              <span className="truncate text-white">
                 {file.name}
               </span>
-
             </div>
-          )}
 
-          <div className="mt-10">
-
-            <Button
-              loading={loading}
-              onClick={handleUpload}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setFile(null);
+              }}
+              className="shrink-0 text-sm text-zinc-400 transition hover:text-red-400"
             >
-              Upload Resume
-            </Button>
+              Remove
+            </button>
 
           </div>
+        )}
 
+        {/* Upload Button */}
+        <div className="mt-8">
+          <Button
+            loading={loading}
+            onClick={handleUpload}
+          >
+            Upload Resume
+          </Button>
         </div>
 
       </main>

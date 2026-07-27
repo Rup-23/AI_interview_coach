@@ -1,51 +1,15 @@
-import { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-
 import Navbar from "../../components/layout/Navbar";
-import { getCurrentUser } from "../../services/auth.service";
+import Loader from "../../components/ui/Loader";
+import useAuth from "../../hooks/useAuth";
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
 
-//   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await getCurrentUser();
-        setUser(response.data);
-      } catch (error) {
-        toast.error(
-          error.response?.data?.message || "Failed to load profile."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-//   const handleLogout = async () => {
-//     try {
-//       await logoutUser();
-
-//       toast.success("Logged out successfully.");
-
-//       navigate("/login");
-//     } catch (error) {
-//       toast.error(
-//         error.response?.data?.message || "Logout failed."
-//       );
-//     }
-//   };
-
-  if (loading) {
+  if (loading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-xl font-semibold text-white">
-        Loading Profile...
+      <div className="min-h-screen bg-zinc-950">
+        <Navbar />
+        <Loader fullScreen text="Loading Profile..." />
       </div>
     );
   }
@@ -59,13 +23,10 @@ const Profile = () => {
         <div className="rounded-3xl border border-zinc-800 bg-zinc-900 p-10 shadow-2xl">
 
           {/* Avatar */}
-
           <div className="flex flex-col items-center">
 
             <div className="flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 text-5xl font-bold text-white shadow-lg">
-
               {user.fullName.charAt(0).toUpperCase()}
-
             </div>
 
             <h1 className="mt-6 text-4xl font-bold text-white">
@@ -79,37 +40,29 @@ const Profile = () => {
           </div>
 
           {/* Information Cards */}
-
           <div className="mt-12 grid gap-6 md:grid-cols-2">
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 transition hover:border-blue-500">
-
               <p className="text-sm uppercase tracking-wider text-zinc-500">
                 Member Since
               </p>
-
               <h2 className="mt-3 text-2xl font-semibold text-white">
                 {new Date(user.createdAt).toLocaleDateString()}
               </h2>
-
             </div>
 
             <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 transition hover:border-blue-500">
-
               <p className="text-sm uppercase tracking-wider text-zinc-500">
                 Interviews Completed
               </p>
-
               <h2 className="mt-3 text-3xl font-bold text-blue-500">
                 {user.completedInterviews || "Not available"}
               </h2>
-
             </div>
 
           </div>
 
           {/* Motivation */}
-
           <div className="mt-12 rounded-2xl border border-blue-500/20 bg-blue-500/10 p-8">
 
             <h2 className="text-2xl font-bold text-white">
@@ -147,15 +100,6 @@ const Profile = () => {
             </div>
 
           </div>
-
-          {/* Logout */}
-
-          {/* <button
-            onClick={handleLogout}
-            className="mt-12 w-full rounded-2xl bg-red-600 py-4 text-lg font-semibold text-white transition-all duration-300 hover:bg-red-700"
-          >
-            Logout
-          </button> */}
 
         </div>
 
