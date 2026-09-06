@@ -41,3 +41,8 @@ export const getInterviewHistory = async () => {
   const response = await api.get("/interview/history");
   return response.data;
 };
+
+export const deleteInterview = async (interviewId) => {
+  const response = await api.delete(`/interview/${interviewId}`);
+  return response.data;
+};

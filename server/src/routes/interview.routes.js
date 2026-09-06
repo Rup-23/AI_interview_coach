@@ -8,6 +8,7 @@ import {
     completeInterview,
     getInterviewById,
     getInterviewHistory,
+    deleteInterview,
 } from "../controllers/interview.controller.js";
 
 const router = express.Router();
@@ -42,7 +43,10 @@ router.get(
     getInterviewById
 );
 
-
-
+router.delete(
+    "/:interviewId",
+    verifyJWT,
+    deleteInterview
+);
 
 export default router;

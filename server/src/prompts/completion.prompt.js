@@ -18,13 +18,11 @@ Analyze the overall interview performance.
 
 Instructions:
 
-1. Calculate an overall score from 0 to 100.
+1. Identify the candidate's strengths.
 
-2. Identify the candidate's strengths.
+2. Identify the candidate's weaknesses.
 
-3. Identify the candidate's weaknesses.
-
-4. Give practical recommendations.
+3. Give practical recommendations.
 
 5. Adapt your evaluation based on the candidate's profession and role.
 
@@ -39,7 +37,6 @@ Instructions:
 Return exactly this format:
 
 {
-  "overallScore": 85,
   "strengths": [
     "..."
   ],

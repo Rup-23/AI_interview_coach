@@ -1,5 +1,6 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import apiResponse from "../utils/apiResponse.js";
+import Interview from "../models/Interview.model.js";
 
 export const getCurrentUser = asyncHandler(async (req, res) => {
   return apiResponse(
@@ -13,29 +14,33 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
 
 export const getDashboardStats = asyncHandler(async (req, res) => {
 
-    const interviews = await Interview.find({
+    const completedInterviews = await Interview.find({
         user: req.user._id,
-    });
+        status: "Completed",
+    })
+        .select("role difficulty overallScore completedAt")
+        .sort({ completedAt: -1 });
 
-    const totalInterviews = interviews.length;
+    const totalCompleted = completedInterviews.length;
 
-    const completedInterviews = interviews.filter(
-        (interview) => interview.status === "Completed"
-    ).length;
-
-    const pendingInterviews = interviews.filter(
-        (interview) => interview.status === "Pending"
-    ).length;
-
-    const totalScore = interviews.reduce(
+    const totalScore = completedInterviews.reduce(
         (sum, interview) => sum + interview.overallScore,
         0
     );
 
     const averageScore =
-        completedInterviews === 0
+        totalCompleted === 0
             ? 0
-            : Math.round(totalScore / completedInterviews);
+            : Math.round(totalScore / totalCompleted);
+
+    const highestScore =
+        totalCompleted === 0
+            ? 0
+            : Math.max(
+                  ...completedInterviews.map((i) => i.overallScore)
+              );
+
+    const recentInterviews = completedInterviews.slice(0, 5);
 
     return apiResponse(
         res,
@@ -43,10 +48,10 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
         true,
         "Dashboard statistics fetched successfully.",
         {
-            totalInterviews,
-            completedInterviews,
-            pendingInterviews,
+            totalCompleted,
             averageScore,
+            highestScore,
+            recentInterviews,
         }
     );
 

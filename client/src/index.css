@@ -1,21 +1,241 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
+/* ── Design Tokens ── */
+:root {
+  --color-primary: #3b82f6;
+  --color-primary-light: #60a5fa;
+  --color-primary-dark: #2563eb;
+  --color-accent: #06b6d4;
+  --color-accent-light: #22d3ee;
+
+  --color-surface-950: #09090b;
+  --color-surface-900: #18181b;
+  --color-surface-800: #27272a;
+  --color-surface-700: #3f3f46;
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  --gradient-brand: linear-gradient(135deg, #3b82f6 0%, #06b6d4 50%, #8b5cf6 100%);
+  --gradient-warm: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --gradient-cool: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  --gradient-surface: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+
+  --shadow-glow-sm: 0 0 15px rgba(59, 130, 246, 0.15);
+  --shadow-glow-md: 0 0 30px rgba(59, 130, 246, 0.2);
+  --shadow-glow-lg: 0 4px 60px rgba(59, 130, 246, 0.25);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* ── Base ── */
 html {
-
-    font-family: "Inter", sans-serif;
-
-    background: #09090B;
-
-    color: white;
-
+  font-family: var(--font-sans);
+  background: var(--color-surface-950);
+  color: white;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-surface-950);
+}
 
-    margin: 0;
+/* ── Custom Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface-950);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-700);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-surface-800);
+}
 
-    min-height: 100vh;
+/* ── Selection ── */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
 
-    background: #09090B;
+/* ── Keyframe Animations ── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); }
+  50%      { box-shadow: 0 0 40px rgba(59, 130, 246, 0.3); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
+
+@keyframes dot-pulse {
+  0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Animation Utilities ── */
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out both;
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s ease-out both;
+}
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out both;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* Stagger delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+
+/* ── Glassmorphism ── */
+.glass {
+  background: rgba(24, 24, 27, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(63, 63, 70, 0.4);
+}
+
+.glass-strong {
+  background: rgba(24, 24, 27, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(63, 63, 70, 0.5);
+}
+
+/* ── Gradient Text ── */
+.gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-cool {
+  background: var(--gradient-cool);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Dot Pulse Loader ── */
+.dot-pulse {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.dot-pulse span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: dot-pulse 1.4s infinite ease-in-out both;
+}
+.dot-pulse span:nth-child(2) { animation-delay: 0.16s; }
+.dot-pulse span:nth-child(3) { animation-delay: 0.32s; }
+
+/* ── Shimmer Skeleton ── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-800) 25%,
+    var(--color-surface-700) 50%,
+    var(--color-surface-800) 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ── Animated Grid Background ── */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ── Focus Ring ── */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

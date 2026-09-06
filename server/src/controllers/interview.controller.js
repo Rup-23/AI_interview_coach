@@ -125,6 +125,7 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
             },
         ],
         temperature: 0.3,
+        response_format: { type: "json_object" },
     });
 
     const aiResponse = response.choices[0].message.content;
@@ -132,9 +133,22 @@ export const evaluateAnswer = asyncHandler(async (req, res) => {
     let evaluation;
 
     try {
-        evaluation = JSON.parse(aiResponse);
+        const jsonMatch = aiResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+        const jsonStr = jsonMatch ? jsonMatch[1].trim() : aiResponse.trim();
+        evaluation = JSON.parse(jsonStr);
     } catch (error) {
-        throw new ApiError(500, "Failed to parse AI response.");
+        try {
+            const firstBrace = aiResponse.indexOf('{');
+            const lastBrace = aiResponse.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1) {
+                evaluation = JSON.parse(aiResponse.substring(firstBrace, lastBrace + 1));
+            } else {
+                throw new Error("No JSON found");
+            }
+        } catch (innerError) {
+            console.error("Parse Error:", aiResponse);
+            throw new ApiError(500, "Failed to parse AI response.");
+        }
     }
 
     question.answer = answer;
@@ -179,8 +193,9 @@ export const completeInterview = asyncHandler(async (req, res) => {
     }
 
     const prompt = buildCompletionPrompt(
-        interview.questions,
-        interview.role
+        interview.role,
+        interview.difficulty,
+        interview.questions
     );
 
     const response = await groq.chat.completions.create({
@@ -192,6 +207,7 @@ export const completeInterview = asyncHandler(async (req, res) => {
             },
         ],
         temperature: 0.3,
+        response_format: { type: "json_object" },
     });
 
     const aiResponse = response.choices[0].message.content;
@@ -199,12 +215,30 @@ export const completeInterview = asyncHandler(async (req, res) => {
     let report;
 
     try {
-        report = JSON.parse(aiResponse);
+        const jsonMatch = aiResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+        const jsonStr = jsonMatch ? jsonMatch[1].trim() : aiResponse.trim();
+        report = JSON.parse(jsonStr);
     } catch (error) {
-        throw new ApiError(500, "Failed to parse AI response.");
+        try {
+            const firstBrace = aiResponse.indexOf('{');
+            const lastBrace = aiResponse.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1) {
+                report = JSON.parse(aiResponse.substring(firstBrace, lastBrace + 1));
+            } else {
+                throw new Error("No JSON found");
+            }
+        } catch (innerError) {
+            console.error("Parse Error:", aiResponse);
+            throw new ApiError(500, "Failed to parse AI response.");
+        }
     }
 
-    interview.overallScore = report.overallScore;
+    // Programmatically calculate the overall score instead of relying on the AI
+    const totalScore = interview.questions.reduce((sum, q) => sum + (q.score || 0), 0);
+    const maxPossibleScore = interview.questions.length * 10;
+    const computedOverallScore = maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
+
+    interview.overallScore = computedOverallScore;
     interview.strengths = report.strengths;
     interview.weaknesses = report.weaknesses;
     interview.recommendations = report.recommendations;
@@ -252,12 +286,13 @@ export const getInterviewHistory = asyncHandler(async (req, res) => {
 
     const interviews = await Interview.find({
         user: req.user._id,
+        status: "Completed",
     })
         .select(
-            "role difficulty overallScore status createdAt"
+            "role difficulty overallScore status createdAt completedAt"
         )
         .sort({
-            createdAt: -1,
+            completedAt: -1,
         });
 
     return apiResponse(
@@ -266,6 +301,38 @@ export const getInterviewHistory = asyncHandler(async (req, res) => {
         true,
         "Interview history fetched successfully.",
         interviews
+    );
+
+});
+
+// Delete an incomplete (Pending) interview
+export const deleteInterview = asyncHandler(async (req, res) => {
+
+    const { interviewId } = req.params;
+
+    const interview = await Interview.findOne({
+        _id: interviewId,
+        user: req.user._id,
+    });
+
+    if (!interview) {
+        throw new ApiError(404, "Interview not found.");
+    }
+
+    if (interview.status === "Completed") {
+        throw new ApiError(
+            400,
+            "Cannot delete a completed interview."
+        );
+    }
+
+    await Interview.findByIdAndDelete(interviewId);
+
+    return apiResponse(
+        res,
+        200,
+        true,
+        "Interview deleted successfully."
     );
 
 });

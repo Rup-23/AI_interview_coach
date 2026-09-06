@@ -12,7 +12,7 @@ const accessTokenOptions = {
   httpOnly: true,
   secure: isProduction,
   sameSite: isProduction ? "none" : "lax",
-  maxAge: 2 * 60 * 1000,
+  maxAge: 15 * 60 * 1000,
 };
 
 const refreshTokenOptions = {
@@ -185,18 +185,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid Refresh Token");
   }
 
-  console.log("========== REFRESH DEBUG ==========");
-  console.log("DB Token:");
-  console.log(user.refreshToken);
 
-  console.log("Incoming Token:");
-  console.log(incomingRefreshToken);
-
-  console.log(
-    "Equal ?",
-    user.refreshToken === incomingRefreshToken
-  );
-  console.log("===================================");
 
   if (user.refreshToken !== incomingRefreshToken) {
     throw new ApiError(
